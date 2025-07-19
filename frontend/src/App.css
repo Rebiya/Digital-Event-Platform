@@ -2,3 +2,47 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom styles for LiveKit components */
+.lk-video-conference {
+  height: 100%;
+  background: #111827;
+}
+
+.lk-focus-layout {
+  background: #111827;
+}
+
+.lk-participant-tile {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lk-control-bar {
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #374151;
+}
+
+.lk-chat {
+  background: #1f2937;
+  border-left: 1px solid #374151;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

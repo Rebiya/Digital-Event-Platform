@@ -1,38 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { LiveKitRoom } from '@livekit/components-react';
+import '@livekit/components-styles';
+import JoinPage from './components/JoinPage';
+import RoomPage from './components/RoomPage';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Verify the LiveKit URL is loaded from .env
+  const livekitUrl = import.meta.env.VITE_LIVEKIT_URL;
+  console.log(livekitUrl);
+  
+  if (!livekitUrl) {
+    console.error('Missing LiveKit URL in environment variables');
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
+        <div className="text-center p-6 bg-red-900 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Configuration Error</h2>
+          <p>LiveKit server URL is not configured.</p>
+          <p>Please check your .env file and restart the application.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
-      <div className="flex items-center justify-center gap-8 mb-8">
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="w-24 h-24 hover:drop-shadow-[0_0_2em_#646cffaa]" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="w-24 h-24 hover:drop-shadow-[0_0_2em_#61dafbaa]" alt="React logo" />
-        </a>
+    <Router>
+      <div className="min-h-screen bg-gray-900">
+        <Routes>
+          <Route path="/" element={<Navigate to="/join" replace />} />
+          <Route path="/join" element={<JoinPage />} />
+          <Route 
+            path="/room/:roomName" 
+            element={
+              <LiveKitRoom
+                serverUrl={livekitUrl}
+                token={localStorage.getItem('livekit-token')}
+                connect={true}
+                onError={(error) => {
+                  console.error('LiveKit connection error:', error);
+                  alert(`Connection failed: ${error.message}`);
+                }}
+                onDisconnected={() => {
+                  localStorage.removeItem('livekit-token');
+                  window.location.href = '/join';
+                }}
+              >
+                <RoomPage />
+              </LiveKitRoom>
+            } 
+          />
+        </Routes>
       </div>
-      <h1 className="text-4xl font-bold mb-8 text-gray-800">Vite + React</h1>
-      <div className="bg-white p-8 rounded-lg shadow-md text-center mb-8">
-        <button
-          onClick={() => setCount((count) => count + 1)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          count is {count}
-        </button>
-        <p className="mt-4 text-gray-600">
-          Edit <code className="font-mono bg-gray-200 px-1 rounded">src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="text-gray-500">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;
