@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    ports:
+      - "7880:7880"  # WebSocket
+      - "7881:7881"  # TCP TURN
+      - "7882:7882/udp"  # UDP Media
+    volumes:
+      - ./config.yaml:/etc/livekit.yaml
+    command: --config /etc/livekit.yaml
+    environment:
+      - LIVEKIT_LOG_LEVEL=info
