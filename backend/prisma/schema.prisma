@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  host          String
+  createdAt     DateTime       @default(now())
+  breakoutRooms BreakoutRoom[]
+}
+
+model BreakoutRoom {
+  id           Int      @id @default(autoincrement())
+  name         String
+  participants String   // store as comma-separated usernames
+  room         Room     @relation(fields: [roomId], references: [id])
+  roomId       Int
+  createdAt    DateTime @default(now())
+}
+
