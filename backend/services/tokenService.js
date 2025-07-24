@@ -2,30 +2,32 @@ const { AccessToken } = require('livekit-server-sdk');
 const prisma = require('./prismaClient');
 
 const generateToken = async (roomName, userName, apiKey, apiSecret) => {
-  // Check if room exists
-  let room = await prisma.room.findUnique({ where: { name: roomName } });
-
   let isHost = false;
 
+  let room = await prisma.room.findUnique({ where: { name: roomName } });
+
   if (!room) {
-    // First joiner = host
     await prisma.room.create({
       data: {
         name: roomName,
-        host: userName
+        host: userName,
       }
     });
     isHost = true;
-  } else if (room.host === userName) {
-    isHost = true;
+  } else {
+    if (roomName === room.name && userName !== room.host) {
+      throw new Error('Main room already exists');
+    }
+
+    if (room.host === userName) {
+      isHost = true;
+    }
   }
 
   const token = new AccessToken(apiKey, apiSecret, {
     identity: userName,
     name: userName,
-    metadata: JSON.stringify({
-      isHost,
-    })
+    metadata: JSON.stringify({ isHost }),
   });
 
   token.addGrant({

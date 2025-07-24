@@ -17,35 +17,37 @@ const getToken = async (req, res) => {
 
   try {
     const token = await generateToken(roomName, userName, apiKey, apiSecret);
-    res.json({ token, url: livekitUrl });
+    res.status(200).json({ token, url: livekitUrl });
   } catch (err) {
-    console.error('Token generation failed:', err);
-    res.status(500).json({ error: 'Token generation failed' });
+    console.error('Token generation failed:', err.message);
+    const msg = err.message === 'Main room already exists' ? err.message : 'Token generation failed';
+    res.status(500).json({ error: msg });
   }
 };
 
-
-
 const claimHost = async (req, res) => {
-  const { roomName, userName } = req.body;
+  const { roomName, userName, approver } = req.body;
 
   try {
     const room = await prisma.room.findUnique({ where: { name: roomName } });
-    if (!room) return res.status(404).json({ error: 'Room not found' });
+    if (!room) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
 
-    // Change host
+    if (room.host !== approver) {
+      return res.status(403).json({ error: 'Only current host can assign new host' });
+    }
+
     await prisma.room.update({
       where: { name: roomName },
       data: { host: userName }
     });
 
-    res.json({ message: `${userName} is now the host` });
+    return res.status(200).json({ message: `Success: ${userName} is now the host.` });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Host claim failed' });
+    console.error('Host claim error:', err);
+    return res.status(500).json({ error: 'Failed to assign new host' });
   }
 };
 
-
 module.exports = { getToken, claimHost };
-
