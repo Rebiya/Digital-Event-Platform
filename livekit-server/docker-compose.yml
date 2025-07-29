@@ -1,7 +1,6 @@
-version: '3.8'
 services:
   livekit:
-    image: livekit/livekit-server:latest
+    image: livekit/livekit-server:v1.6.0
     ports:
       - "7880:7880"  # WebSocket
       - "7881:7881"  # TCP TURN
@@ -11,3 +10,19 @@ services:
     command: --config /etc/livekit.yaml
     environment:
       - LIVEKIT_LOG_LEVEL=info
+    networks:
+      - livekit-network
+    depends_on:
+      - turn
+  turn:
+    image: coturn/coturn:latest
+    ports:
+      - "3478:3478"
+      - "5349:5349"
+    volumes:
+      - ./turnserver.conf:/etc/turnserver.conf
+    networks:
+      - livekit-network
+networks:
+  livekit-network:
+    driver: bridge

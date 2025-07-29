@@ -1,11 +1,14 @@
 port: 7880
-
 rtc:
-  udp_port: 7882
-  tcp_port: 7881
-
+  udp_port: 7881
+  tcp_port: 7882
+  use_external_ip: true
+  turn_servers:
+    - urls:
+        - turn:turn:3478
+      username: livekituser
+      credential: livekitpass
 keys:
   VecViQPsDzQSImrjNr5pwqsUoFo1WCbfWxt82RaErNc=: DvaTxG7dtFjHQxK3fauSZYhwuSs4hF0oV5bWz8IHOf4=
-
 logging:
   level: info

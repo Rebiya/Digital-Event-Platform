@@ -1,26 +1,25 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 model Room {
-  id            Int            @id @default(autoincrement())
-  name          String         @unique
-  host          String
+  id            String         @id @default(cuid())
+  name          String
+  isBreakout    Boolean        @default(false)
+  hostId        String
   createdAt     DateTime       @default(now())
-  breakoutRooms BreakoutRoom[]
+  breakoutRooms BreakoutRoom[]  // One-to-many relationship
 }
 
 model BreakoutRoom {
-  id           Int      @id @default(autoincrement())
-  name         String
-  participants String   // store as comma-separated usernames
-  room         Room     @relation(fields: [roomId], references: [id])
-  roomId       Int
-  createdAt    DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  parentId  String
+  parent    Room     @relation(fields: [parentId], references: [id])
+  createdAt DateTime @default(now())
 }
-
