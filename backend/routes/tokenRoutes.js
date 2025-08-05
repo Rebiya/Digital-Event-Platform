@@ -1,9 +1,9 @@
 const express = require('express');
-const { getToken, claimHost } = require('../controllers/tokenController');
+const { joinRoom } = require('../controllers/tokenController');
 const router = express.Router();
 
-router.post('/token', getToken);
-router.post('/claim-host', claimHost);
+router.post('/token', joinRoom);
+// router.post('/claim-host', claimHost);
 
 module.exports = router;
 

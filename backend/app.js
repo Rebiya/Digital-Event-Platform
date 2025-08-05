@@ -13,12 +13,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
+
 app.use('/api', indexRoute);
 
 
-console.log('LIVEKIT_API_KEY:', process.env.LIVEKIT_API_KEY);
-console.log('LIVEKIT_API_SECRET:', process.env.LIVEKIT_API_SECRET);
-console.log('Port:', process.env.PORT);
+// console.log('LIVEKIT_API_KEY:', process.env.LIVEKIT_API_KEY);
+// console.log('LIVEKIT_API_SECRET:', process.env.LIVEKIT_API_SECRET);
+// console.log('Port:', process.env.PORT);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

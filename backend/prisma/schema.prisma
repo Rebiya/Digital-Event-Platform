@@ -7,19 +7,64 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id               String            @id @default(cuid())
+  username         String
+  email            String            @unique
+  createdAt        DateTime          @default(now())
+  messages         Message[]
+  callsAsCaller    Call[]            @relation("CallerCalls")
+  callsAsReceiver  Call[]            @relation("ReceiverCalls")
+  roomParticipants RoomParticipant[]
+}
+
+model RoomParticipant {
+  id       String   @id @default(cuid())
+  room     Room     @relation(fields: [roomId], references: [id])
+  roomId   String
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+  joinedAt DateTime @default(now())
+  isHost   Boolean  @default(false) // <-- Add this line
+
+  @@unique([roomId, userId])
+}
+
 model Room {
-  id            String         @id @default(cuid())
-  name          String
-  isBreakout    Boolean        @default(false)
+  id            String            @id @default(cuid())
+  name          String            @unique
+  isBreakout    Boolean           @default(false)
   hostId        String
-  createdAt     DateTime       @default(now())
-  breakoutRooms BreakoutRoom[]  // One-to-many relationship
+  createdAt     DateTime          @default(now())
+  breakoutRooms BreakoutRoom[]
+  messages      Message[]
+  participants  RoomParticipant[]
 }
 
 model BreakoutRoom {
   id        String   @id @default(cuid())
-  name      String
+  name      String   @unique
   parentId  String
   parent    Room     @relation(fields: [parentId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model Call {
+  id         String    @id @default(cuid())
+  callerId   String
+  receiverId String
+  startedAt  DateTime  @default(now())
+  endedAt    DateTime?
+  caller     User      @relation("CallerCalls", fields: [callerId], references: [id])
+  receiver   User      @relation("ReceiverCalls", fields: [receiverId], references: [id])
+}
+
+model Message {
+  id       String   @id @default(cuid())
+  content  String
+  senderId String
+  sender   User     @relation(fields: [senderId], references: [id])
+  roomId   String
+  room     Room     @relation(fields: [roomId], references: [id])
+  sentAt   DateTime @default(now())
 }
