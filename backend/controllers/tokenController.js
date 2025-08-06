@@ -1,14 +1,12 @@
-// Controller (user joins room)
-const { generateToken } = require('../services/tokenService');
+const { generateTokenFromUsername } = require('../services/tokenService');
 
 const joinRoom = async (req, res) => {
-  const { roomName, userId, userName } = req.body;
+  const { roomName, userName } = req.body; // <- corrected here
 
   try {
-    const { token, isHost } = await generateToken(
+    const { token, isHost } = await generateTokenFromUsername(
       roomName,
-      userId,
-      userName,
+      userName, // <- pass the correct variable
       process.env.LIVEKIT_API_KEY,
       process.env.LIVEKIT_API_SECRET
     );
@@ -19,9 +17,15 @@ const joinRoom = async (req, res) => {
       isHost,
     });
   } catch (err) {
-    console.error('Join Room Error:', err);
+    console.error('Join Room Error:', err.message);
+
+    if (err.message === 'User not found.') {
+      return res.status(404).json({ error: 'Username not found. Please check and try again.' });
+    }
+
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 module.exports = { joinRoom };

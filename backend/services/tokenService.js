@@ -1,7 +1,18 @@
 const { AccessToken } = require('livekit-server-sdk');
 const prisma = require('./prismaClient');
 
-const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
+const generateTokenFromUsername = async (roomName, username, apiKey, apiSecret) => {
+  // Step 0: Look up user
+  const user = await prisma.user.findUnique({
+    where: { username },
+  });
+
+  if (!user) {
+    throw new Error('User not found.');
+  }
+
+  const userId = user.id;
+
   // Step 1: Check if the room exists
   let room = await prisma.room.findUnique({
     where: { name: roomName },
@@ -18,7 +29,7 @@ const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
         hostId: userId,
         participants: {
           create: {
-            userId: userId,
+            userId,
             isHost: true,
           }
         }
@@ -27,7 +38,7 @@ const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
     });
     isHost = true;
   } else {
-    // Check if user is already a participant
+    // Step 3: Check if user already in room
     const existingParticipant = await prisma.roomParticipant.findUnique({
       where: {
         roomId_userId: {
@@ -38,18 +49,14 @@ const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
     });
 
     if (existingParticipant) {
-      // User is rejoining - use their existing host status
       isHost = existingParticipant.isHost;
     } else {
-      // New participant - check if they should be host
       const existingParticipants = await prisma.roomParticipant.findMany({
         where: { roomId: room.id },
       });
 
-      // If no other participants, this user becomes host
       isHost = existingParticipants.length === 0;
 
-      // Create new participant record
       await prisma.roomParticipant.create({
         data: {
           roomId: room.id,
@@ -58,7 +65,6 @@ const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
         },
       });
 
-      // Update room hostId if this user is the first participant
       if (isHost) {
         await prisma.room.update({
           where: { id: room.id },
@@ -68,11 +74,11 @@ const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
     }
   }
 
-  // Step 3: Generate LiveKit Token
+  // Step 4: Generate LiveKit token
   const token = new AccessToken(apiKey, apiSecret, {
     identity: userId,
-    name: userName,
-    metadata: JSON.stringify({ userId, userName, isHost }),
+    name: username,
+    metadata: JSON.stringify({ userId, username, isHost }),
   });
 
   token.addGrant({
@@ -81,7 +87,7 @@ const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
     canPublish: true,
     canSubscribe: true,
     canPublishData: true,
-    roomAdmin: isHost, // Give host additional permissions
+    roomAdmin: isHost,
   });
 
   return {
@@ -90,4 +96,4 @@ const generateToken = async (roomName, userId, userName, apiKey, apiSecret) => {
   };
 };
 
-module.exports = { generateToken };
+module.exports = { generateTokenFromUsername };
