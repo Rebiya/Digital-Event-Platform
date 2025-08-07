@@ -9,9 +9,11 @@ import {
   TrackToggle,
   TrackMutedIndicator,
   useTrackToggle,
-  useTracks
+  useTracks,
+  useConnectionState
 } from '@livekit/components-react';
 import '@livekit/components-styles';
+import ParticipantGrid from './ParticipantGrid';
 
 // Icons component
 const MeetingIcons = {
@@ -74,6 +76,31 @@ const MeetingIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
     </svg>
   )
+};
+
+// Connection Status Component
+const ConnectionStatus = () => {
+  const connectionState = useConnectionState();
+  
+  if (connectionState === 'connected') return null;
+
+  return (
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+      {connectionState === 'connecting' && (
+        <div className="flex items-center gap-2">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          Connecting...
+        </div>
+      )}
+      {connectionState === 'reconnecting' && (
+        <div className="flex items-center gap-2">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
+          Reconnecting...
+        </div>
+      )}
+      {connectionState === 'disconnected' && 'Disconnected'}
+    </div>
+  );
 };
 
 const RoomPage = () => {
@@ -167,7 +194,23 @@ const RoomPage = () => {
   }
 
   return (
+    <LiveKitRoom
+    token={token}
+    serverUrl={import.meta.env.VITE_LIVEKIT_URL || 'ws://localhost:7880'}
+    connect={true}
+    options={{
+      adaptiveStream: true,
+      dynacast: true,
+      publishDefaults: {
+        simulcast: true
+      }
+    }}
+    onConnected={() => console.log('Connected to room')}
+    onDisconnected={handleDisconnect}
+  >
     <div className="h-screen flex flex-col bg-gray-900">
+      <ConnectionStatus />
+      
       {/* Top Bar */}
       <div className="flex justify-between items-center px-4 py-2 bg-gray-800 text-white border-b border-gray-700">
         <div className="flex items-center space-x-4">
@@ -197,7 +240,7 @@ const RoomPage = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 relative overflow-hidden">
-        <VideoConference className="h-full w-full" />
+        <ParticipantGrid />
         
         {/* Participant List Panel */}
         {showParticipants && (
@@ -430,6 +473,7 @@ const RoomPage = () => {
         </div>
       </div>
     </div>
+    </LiveKitRoom>
   );
 };
 
