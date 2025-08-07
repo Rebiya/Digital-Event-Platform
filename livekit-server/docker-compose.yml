@@ -1,10 +1,10 @@
 services:
   livekit:
-    image: livekit/livekit-server:v1.6.0
+    image: livekit/livekit-server:latest
     ports:
-      - "7880:7880"  # WebSocket
-      - "7881:7881"  # TCP TURN
-      - "7882:7882/udp"  # UDP Media
+      - "7880:7880"       # WebSocket / HTTP
+      - "7881:7881"       # TCP Media
+      - "7882:7882/udp"   # UDP Media
     volumes:
       - ./config.yaml:/etc/livekit.yaml
     command: --config /etc/livekit.yaml
@@ -12,17 +12,7 @@ services:
       - LIVEKIT_LOG_LEVEL=info
     networks:
       - livekit-network
-    depends_on:
-      - turn
-  turn:
-    image: coturn/coturn:latest
-    ports:
-      - "3478:3478"
-      - "5349:5349"
-    volumes:
-      - ./turnserver.conf:/etc/turnserver.conf
-    networks:
-      - livekit-network
+
 networks:
   livekit-network:
     driver: bridge
