@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001/api/breakout';
+const API_BASE_URL = 'http://192.168.127.177:3001/api/breakout';
 
 // Create a reusable axios instance
 const apiClient = axios.create({

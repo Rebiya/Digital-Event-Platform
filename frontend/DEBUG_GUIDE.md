@@ -45,13 +45,13 @@ logging:
 ### 1. **Test WebSocket Connection**
 ```bash
 # Test if WebSocket port is accessible
-curl -I http://localhost:7880
+curl -I http://192.168.127.177:7880
 ```
 
 ### 2. **Test Token Generation**
 ```bash
 # Check if backend is running
-curl http://localhost:3001/api/token
+curl http://192.168.127.177:3001/api/token
 ```
 
 ### 3. **Browser Console Checks**
@@ -141,7 +141,7 @@ api:
 
 Ensure these are set in `.env`:
 ```env
-VITE_LIVEKIT_URL=ws://localhost:7880
+VITE_LIVEKIT_URL=ws://192.168.127.177:7880
 ```
 
 ## 📊 Performance Monitoring
