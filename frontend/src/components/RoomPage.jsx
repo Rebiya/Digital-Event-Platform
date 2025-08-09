@@ -196,7 +196,7 @@ const RoomPage = () => {
   return (
     <LiveKitRoom
     token={token}
-    serverUrl={'ws://192.168.127.177:7880'}
+    serverUrl={'ws://192.168.43.178:7880'}
     connect={true}
     options={{
       adaptiveStream: true,

@@ -6,9 +6,9 @@ import RoomPage from './components/RoomPage';
 import './App.css';
 
 function App() {
-  // Verify the LiveKit URL is loaded from .env
-  const livekitUrl = import.meta.env.VITE_LIVEKIT_URL;
-  console.log(livekitUrl);
+  // Use hardcoded LiveKit URL for local development
+  const livekitUrl = import.meta.env.VITE_LIVEKIT_URL || 'ws://192.168.43.178:7880';
+  console.log('LiveKit URL:', livekitUrl);
   
   if (!livekitUrl) {
     console.error('Missing LiveKit URL in environment variables');
@@ -36,6 +36,13 @@ function App() {
                 serverUrl={livekitUrl}
                 token={localStorage.getItem('livekit-token')}
                 connect={true}
+                options={{
+                  adaptiveStream: true,
+                  dynacast: true,
+                  publishDefaults: {
+                    simulcast: true
+                  }
+                }}
                 onError={(error) => {
                   console.error('LiveKit connection error:', error);
                   alert(`Connection failed: ${error.message}`);
